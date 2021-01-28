@@ -145,11 +145,11 @@ void printTemp(double temp, int x, int y)
   }
   else if (temp < 10)
   {
-    matrix.setTextColor(matrix.color565(255, 127, 127));
+    matrix.setTextColor(matrix.color565(255, 255, 127));
   }
   else
   {
-    matrix.setTextColor(matrix.color565(255, 200, 200));
+    matrix.setTextColor(matrix.color565(255, 140, 0));
   }
 
   char tempStr[10];
