@@ -2,6 +2,7 @@
 #include <WiFiManager.h>
 #include <Adafruit_GFX.h>
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
+#include <Fonts/TomThumb.h>
 
 #include "timeutils.h"
 #include "weather.h"
@@ -17,6 +18,8 @@ Weather *blindern;
 char currentClock[9] = {0};
 char currentDate[11] = {0};
 char currentDay[10] = {0};
+
+bool seenClock = false;
 
 const char *const dayNames[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
@@ -45,11 +48,12 @@ void refresh(void *parameter)
       }
       else
       {
-        sprintf(currentClock, "%02d:%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
-        sprintf(currentDate, "%02d/%02d/%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+        sprintf(currentClock, "%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min);
+        sprintf(currentDate, "%02d/%02d", timeinfo.tm_mday, timeinfo.tm_mon + 1);
         sprintf(currentDay, "%s", dayNames[timeinfo.tm_wday]);
       }
       lastTime = now;
+      seenClock = true;
     }
 
     if (now - lastElveli > freqElveli)
@@ -93,16 +97,36 @@ void setup()
       &refreshTask,  /* Task handle. */
       0);
 
-  // matrix.begin()
+  matrix.begin();
+  matrix.setTextWrap(false);
 }
 
 void loop()
 {
-  Serial.print(currentClock);
-  Serial.print(" ");
-  Serial.print(currentDate);
-  Serial.print(" ");
-  Serial.println(currentDay);
 
-  delay(10000);
+  if (seenClock)
+  {
+    matrix.clearScreen();
+
+    matrix.setFont(&TomThumb);
+
+    matrix.setCursor(1, 7);
+    matrix.setTextColor(matrix.color565(255, 0, 255), matrix.color565(0, 0, 0));
+    matrix.print(currentDay);
+
+    matrix.setCursor(64 - 19 - 1, 7);
+    matrix.setTextColor(matrix.color565(255, 0, 255), matrix.color565(0, 0, 0));
+    matrix.print(currentDate);
+
+    matrix.setFont();
+    matrix.setTextColor(matrix.color565(255, 255, 0), matrix.color565(0, 0, 0));
+    matrix.setCursor(15, 10);
+    matrix.print(currentClock);
+
+    delay(60000);
+  }
+  else
+  {
+    delay(1000);
+  }
 }
