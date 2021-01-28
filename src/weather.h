@@ -12,6 +12,9 @@ private:
     double latitude;
     double longitude;
     char *url;
+    char *getTimeSeriesName();
+    double temperature;
+    double precipitation;
 
 public:
     Weather(const char *name, WiFiClient *client, double latitude, double longitude) : name(name), client(client), latitude(latitude), longitude(longitude)
@@ -26,4 +29,6 @@ public:
         Serial.println(url);
     };
     void update();
+    double getTemperature();
+    double getPrecipitation();
 };
