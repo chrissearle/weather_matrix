@@ -32,19 +32,33 @@ const char *const dayNames[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thu
 
 MatrixPanel_I2S_DMA matrix;
 
+void syncClock()
+{
+  Serial.println("Syncing clock");
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+}
+
 void refresh(void *parameter)
 {
   const long freqElveli = 5 * 60 * 1000;
   const long freqBlindern = 5 * 60 * 1000;
   const long freqShowWeather = 20 * 1000;
+  const long freqSync = 4 * 60 * 60 * 1000;
 
   long lastElveli = millis() - freqElveli;
   long lastBlindern = millis() - freqBlindern;
   long lastShowWeather = millis();
+  long lastSync = millis();
 
   while (1)
   {
     long now = millis();
+
+    if (now - lastSync > freqSync)
+    {
+      syncClock();
+      lastSync = now;
+    }
 
     if (now - lastShowWeather > freqShowWeather)
     {
@@ -88,7 +102,7 @@ void setup()
   Serial.println("Connected to wifi");
 
   // Setup clock
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  syncClock();
 
   elveli = new Weather("Elveli", &wifiClient, 60.023503, 10.618750);
   blindern = new Weather("Blindern", &wifiClient, 59.940395, 10.716017);
